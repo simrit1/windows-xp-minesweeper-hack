@@ -16,6 +16,7 @@
 #define ID_UNKNOWN_FLAG (0x0E)
 #define ID_BACKGROUND (0x40)
 
+PROCESSENTRY32 fnSearchMinesweeperProcess();
 int MineReadTimer(HANDLE hProcess);
 int MineWriteTimer(HANDLE hProcess, DWORD time);
 int MineLocation(HANDLE hProcess);

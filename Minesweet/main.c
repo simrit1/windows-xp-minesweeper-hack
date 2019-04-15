@@ -6,113 +6,122 @@
 
 int main()
 {
-	DWORD pid = NULL, time = NULL;
-	PROCESSENTRY32 pe32 = { NULL };
+    DWORD pid = 0, time = 0 ;
+    HANDLE hProcess;
+    PROCESSENTRY32 pe32;
 
-	printf("Search the minesweeper processs...");
-	pe32 = fnSearchMinesweeperProcess();
-	if (pe32.th32ProcessID == NULL) {
-		puts("FAILED");
-		exit(-1);
-	}
-	puts("SUCCESS");
 
-	printf("PID: %d\n", pe32.th32ProcessID);
+    printf("Search the minesweeper processs...");
+    pe32 = fnSearchMinesweeperProcess();
+    if (pe32.th32ProcessID == NULL) {
+        puts("FAILED");
+        exit(-1);
 
-	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pe32.th32ProcessID);
+    }
+    puts("SUCCESS");
 
-	printf(": %d\n", MineReadTimer(hProcess));
-	puts("Enter the desired timer value");
-	scanf("%d", &time);
+    printf("PID: %d\n", pe32.th32ProcessID);
+    hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pe32.th32ProcessID);
+    printf("\rTimer: %d/n", MineReadTimer(hProcess));
 
-	while (1) {
-		Sleep(1000);
-		system("cls");
-		MineLocation(hProcess);
-		
-	MineWriteTimer(hProcess, time);
-	}
+    puts("Enter the desired timer value");
+    scanf("%d", &time);
 
-	CloseHandle(hProcess);
+    while (1) {
+        Sleep(1000);
+        system("cls");
+        fnMineLocationRadar(hProcess);
+
+        MineWriteTimer(hProcess, time);
+
+    }
+
+    CloseHandle(hProcess);
+
 }
 
 int MineReadTimer(HANDLE hProcess)
 {
-	DWORD time;
-	ReadProcessMemory(
-		hProcess,
-		(LPCVOID)TIMER_ADDRESS,
-		&time,
-		sizeof(DWORD),
-		NULL);
-	return time;
+    DWORD time;
+    ReadProcessMemory(
+            hProcess,
+            (LPCVOID)TIMER_ADDRESS,
+            &time,
+            sizeof(DWORD),
+            NULL
+            );
+    return time;
+
 }
 
 int MineWriteTimer(HANDLE hProcess, DWORD time)
 {
-	WriteProcessMemory(
-		hProcess,
-		(LPCVOID)TIMER_ADDRESS,
-		&time,
-		sizeof(DWORD),
-		NULL);
+    WriteProcessMemory(
+            hProcess,
+            (LPCVOID)TIMER_ADDRESS,
+            &time,
+            sizeof(DWORD),
+            NULL
+            );
+
 }
 
 PROCESSENTRY32 fnSearchMinesweeperProcess() {
-	HANDLE hProcessSnap = CreateToolhelp32Snapshot(
-		TH32CS_SNAPPROCESS,
-		NULL);
-	PROCESSENTRY32 pe32 = { NULL };
-	pe32.dwSize = sizeof(PROCESSENTRY32);
-	char szExeFileCompare[MAX_PATH] = { NULL };
 
-	for (UINT nProcessRow = 0; nProcessRow < 200; nProcessRow++) {
-		Process32Next(hProcessSnap, &pe32);
-		for (UINT nProcessColumn = 0; *(pe32.szExeFile + nProcessColumn) != NULL; nProcessColumn++) {
-			*(szExeFileCompare + nProcessColumn) = *(pe32.szExeFile + nProcessColumn);
-		}
-	if (!strcmp(szExeFileCompare, "Winmine__XP.exe")) {
-		CloseHandle(hProcessSnap);
-		return pe32;
-	}
-		memset(&szExeFileCompare, NULL, strlen(szExeFileCompare));
-	}
+    HANDLE hProcessSnap;
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+    PROCESSENTRY32 pe32 = { NULL  };
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    char szExeFileCompare[MAX_PATH] = { NULL  };
+    UINT nProcessRow, nProcessColumn;
 
-	CloseHandle(hProcessSnap);
-	memset(&pe32, NULL, sizeof(PROCESSENTRY32));
-	return pe32;
+    for (nProcessRow = 0; nProcessRow < 200; nProcessRow++) {
+        Process32Next(hProcessSnap, &pe32);
+        for (nProcessColumn = 0; *(pe32.szExeFile + nProcessColumn) != NULL; nProcessColumn++) {
+            *(szExeFileCompare + nProcessColumn) = *(pe32.szExeFile + nProcessColumn);
+
+        }
+        if (!strcmp(szExeFileCompare, "winmine.exe")) {
+            CloseHandle(hProcessSnap);
+            return pe32;
+
+        }
+        memset(&szExeFileCompare, NULL, strlen(szExeFileCompare));
+
+    }
+
+    CloseHandle(hProcessSnap);
+    memset(&pe32, NULL, sizeof(PROCESSENTRY32));
+    return pe32;
+
 }
 
-int MineLocation(HANDLE hProcess)
+int fnMineLocationRadar(HANDLE hProcess)
 {
-	unsigned char mapTemp[286] = { NULL };
-	unsigned char map[MAP_HEIGHT][MAP_WIDTH] = { NULL };
+    unsigned char gameMapOnMemory[MAP_HEIGHT * MAP_WIDTH] = { 0  };
+    unsigned char gameMap[MAP_HEIGHT][MAP_WIDTH] = { NULL  };
 
-	ReadProcessMemory(
-		hProcess,
-		(LPCVOID)MAP_START_ADDRESS,
-		&mapTemp,
-		286,
-		NULL);
+    ReadProcessMemory(hProcess, (LPCVOID)MAP_START_ADDRESS, &gameMapOnMemory, 286, NULL);
 
-	UINT z = 0;
-	for (UINT y = 0; y < MAP_HEIGHT; y++) {
-		for (UINT x = 0; x < MAP_WIDTH; x++) {
-			if (*(mapTemp + z) == ID_NEWLINE) {
-				z += 1;
-				while ((*(mapTemp + z) != ID_NEWLINE) && (z < MAP)) {
-					z += 1;
-				}
-				z += 1;
-				break;
-			}
-			*(*(map + y) + x) = *(mapTemp + z);
-			z += 1;
-		}
-	}
-	for (UINT y = 0; y < MAP_HEIGHT; y++) {
-		for (UINT x = 0; *(*(map + y) + x) != NULL; x++) {
-			switch (*(*(map + y) + x)) {
+    UINT nMemoryOffset = 0, x, y;
+    for (y = 0; y < MAP_HEIGHT; y++) {
+        for (x = 0; x < MAP_WIDTH; x++) {
+            if (*(gameMapOnMemory + nMemoryOffset) == ID_NEWLINE && (nMemoryOffset < MAP)) {
+                nMemoryOffset += 1;
+                while ((*(gameMapOnMemory + nMemoryOffset) != ID_NEWLINE)) {
+                    nMemoryOffset += 1;
+                }
+                nMemoryOffset += 1;
+                break;
+            }
+            *(*(gameMap + y) + x) = *(gameMapOnMemory + nMemoryOffset);
+            nMemoryOffset += 1;
+        }
+    }
+
+for (y = 0; y < MAP_HEIGHT; y++) {
+		for (x = 0; *(*(gameMap + y) + x) != NULL; x++) {
+			switch (*(*(gameMap + y) + x)) {
 			case ID_MINE:
 				printf("* ");
 				break;

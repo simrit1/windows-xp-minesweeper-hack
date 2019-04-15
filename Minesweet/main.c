@@ -22,7 +22,9 @@ int main()
 
     printf("PID: %d\n", pe32.th32ProcessID);
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pe32.th32ProcessID);
-    printf("\rTimer: %d/n", MineReadTimer(hProcess));
+
+    ReadProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
+    printf("\rTimer: %d/n", time);
 
     puts("Enter the desired timer value");
     scanf("%d", &time);
@@ -31,38 +33,10 @@ int main()
         Sleep(1000);
         system("cls");
         fnMineLocationRadar(hProcess);
-
-        MineWriteTimer(hProcess, time);
-
+        WriteProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
     }
 
     CloseHandle(hProcess);
-
-}
-
-int MineReadTimer(HANDLE hProcess)
-{
-    DWORD time;
-    ReadProcessMemory(
-            hProcess,
-            (LPCVOID)TIMER_ADDRESS,
-            &time,
-            sizeof(DWORD),
-            NULL
-            );
-    return time;
-
-}
-
-int MineWriteTimer(HANDLE hProcess, DWORD time)
-{
-    WriteProcessMemory(
-            hProcess,
-            (LPCVOID)TIMER_ADDRESS,
-            &time,
-            sizeof(DWORD),
-            NULL
-            );
 
 }
 

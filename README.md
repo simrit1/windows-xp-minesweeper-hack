@@ -16,7 +16,9 @@ I'll support Windows 7 minesweeper in a short time
 
 ### Features supported
 
-* Real-time game board analysis
+* Interactive function
+
+* Game board analysis
 
 * Free control the timer
 

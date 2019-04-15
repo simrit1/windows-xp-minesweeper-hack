@@ -1,4 +1,4 @@
-#pragma warning(disable: 4996)
+﻿#pragma warning(disable: 4996)
 #include <windows.h>
 #include <TlHelp32.h>
 #include <stdio.h>
@@ -6,45 +6,61 @@
 
 int main()
 {
-    DWORD pid = 0, time = 0 ;
+	char iAnswer = 0;
+    DWORD pid = 0, time = 0;
     HANDLE hProcess;
     PROCESSENTRY32 pe32;
 
-	fnScreenBanner();
+	system("mode con cols=64 lines=30");
 
     printf("Search the minesweeper processs...");
     pe32 = fnSearchMinesweeperProcess();
     if (pe32.th32ProcessID == NULL) {
         puts("FAILED");
         exit(-1);
-
     }
+
     puts("SUCCESS");
-
     printf("PID: %d\n", pe32.th32ProcessID);
-    hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pe32.th32ProcessID);
+	hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pe32.th32ProcessID);
 
-    ReadProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
-    printf("\rTimer: %d\n", time);
-
-    puts("Enter the desired timer value");
-    scanf("%d", &time);
-
-    while (1) {
-        Sleep(1000);
-        system("cls");
-        fnMineLocationRadar(hProcess);
-        WriteProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
-    }
+	puts("");
+	while (1) {
+		fnScreenBanner();
+		printf("\nPlease select the options\n> ");
+		iAnswer = getch();
+		switch (iAnswer) {
+		case '0':
+			exit(0);
+			break;
+		case '1':
+		    ReadProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
+			printf("\rTimer: %d\n", time);	
+			puts("Enter the desired timer value");
+			scanf("%d", &time);
+			WriteProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, NULL, sizeof(DWORD), NULL);
+	        WriteProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
+			break;
+		case '2':
+			system("cls");
+			fnMineLocationRadar(hProcess);
+			break;
+		default:
+			puts("\nUnknown command");
+			system("timeout 1 /nobreak > nul");
+			system("cls");
+			continue;
+		}
+		system("cls");
+	}
     CloseHandle(hProcess);
 }
 
 PROCESSENTRY32 fnSearchMinesweeperProcess() {
     HANDLE hProcessSnap;
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-    PROCESSENTRY32 pe32 = { NULL };
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-    char szExeFileCompare[MAX_PATH] = { NULL  };
+	PROCESSENTRY32 pe32 = { pe32.dwSize = sizeof(PROCESSENTRY32) };
+    char szExeFileCompare[MAX_PATH] = { NULL };
     UINT nProcessRow, nProcessColumn;
 
     for (nProcessRow = 0; nProcessRow < 200; nProcessRow++) {
@@ -65,13 +81,18 @@ PROCESSENTRY32 fnSearchMinesweeperProcess() {
 
 int fnScreenBanner()
 {
-	char chBanner[MAP_HEIGHT / 2][MAP_WIDTH * 2] = {
+	char chBanner[MAP_HEIGHT * 2][MAP_WIDTH * 2] = {
 		{"  __  __ _                                   _   "},
 		{" |  \\/  (_)                                 | |  "},
 		{" | \\  / |_ _ __   ___  _____      _____  ___| |_ "},
 		{" | |\\/| | | '_ \\ / _ \\/ __\\ \\ /\\ / / _ \\/ _ \\ __|"},
 		{" | |  | | | | | |  __/\\__ \\\\ V  V /  __/  __/ |_ "},
-		{" |_|  |_|_|_| |_|\\___||___/ \\_/\\_/ \\___|\\___|\\__|"} };
+		{" |_|  |_|_|_| |_|\\___||___/ \\_/\\_/ \\___|\\___|\\__|\n\n"},
+		{"1. Edit timer"},
+		{"2. Show mines"},
+		{"0. Exit"}
+	};
+
 	UINT x, y;
 	for (y = 0; y < MAP_HEIGHT / 2; y++) {
 		for (x = 0; x < MAP_WIDTH * 2; x++) {
@@ -83,17 +104,18 @@ int fnScreenBanner()
 
 int fnMineLocationRadar(HANDLE hProcess)
 {
-    unsigned char gameMapOnMemory[MAP_HEIGHT * MAP_WIDTH] = { 0  };
-    unsigned char gameMap[MAP_HEIGHT][MAP_WIDTH] = { NULL };
+    unsigned char gameMapOnMemory[MAP_HEIGHT * MAP_WIDTH] = { 0 };
+    unsigned char gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 
     ReadProcessMemory(hProcess, (LPCVOID)MAP_START_ADDRESS, &gameMapOnMemory, 286, NULL);
 
     UINT nMemoryOffset = 0, x, y;
-    for (y = 0; y < MAP_HEIGHT; y++) {
+	for (y = 0; y < MAP_HEIGHT;  y++) {
         for (x = 0; x < MAP_WIDTH; x++) {
-            if (*(gameMapOnMemory + nMemoryOffset) == ID_NEWLINE && (nMemoryOffset < MAP)) {
+            if (*(gameMapOnMemory + nMemoryOffset) == ID_NEWLINE) {
                 nMemoryOffset += 1;
-                while ((*(gameMapOnMemory + nMemoryOffset) != ID_NEWLINE)) {
+                while ((*(gameMapOnMemory + nMemoryOffset) != ID_NEWLINE) \
+					&& *(gameMapOnMemory + nMemoryOffset) != NULL) {
                     nMemoryOffset += 1;
                 }
                 nMemoryOffset += 1;
@@ -120,7 +142,7 @@ for (y = 0; y < MAP_HEIGHT; y++) {
 				printf("v ");
 				break;
 			case ID_BACKGROUND:
-				printf("0 ");
+				printf(". ");
 				break;
 			case (ID_BACKGROUND + 1):
 				printf("1 ");
@@ -149,5 +171,18 @@ for (y = 0; y < MAP_HEIGHT; y++) {
 			}
 		}
 		puts("");
+	}
+char iAnswer; 
+	while (1) {
+		puts("[q] quit");
+		iAnswer = getch();
+		if (iAnswer == 'q') {
+			return 0;
+			break;
+		}
+		else {
+			puts("Please choice just \'q\'");
+			continue;
+		}
 	}
 }

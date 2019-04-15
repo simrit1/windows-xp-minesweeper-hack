@@ -10,6 +10,7 @@ int main()
     HANDLE hProcess;
     PROCESSENTRY32 pe32;
 
+	fnScreenBanner();
 
     printf("Search the minesweeper processs...");
     pe32 = fnSearchMinesweeperProcess();
@@ -24,7 +25,7 @@ int main()
     hProcess = OpenProcess(PROCESS_ALL_ACCESS, 1, pe32.th32ProcessID);
 
     ReadProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
-    printf("\rTimer: %d/n", time);
+    printf("\rTimer: %d\n", time);
 
     puts("Enter the desired timer value");
     scanf("%d", &time);
@@ -35,16 +36,13 @@ int main()
         fnMineLocationRadar(hProcess);
         WriteProcessMemory(hProcess, (LPCVOID)TIMER_ADDRESS, &time, sizeof(DWORD), NULL);
     }
-
     CloseHandle(hProcess);
-
 }
 
 PROCESSENTRY32 fnSearchMinesweeperProcess() {
-
     HANDLE hProcessSnap;
     hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-    PROCESSENTRY32 pe32 = { NULL  };
+    PROCESSENTRY32 pe32 = { NULL };
     pe32.dwSize = sizeof(PROCESSENTRY32);
     char szExeFileCompare[MAX_PATH] = { NULL  };
     UINT nProcessRow, nProcessColumn;
@@ -53,27 +51,40 @@ PROCESSENTRY32 fnSearchMinesweeperProcess() {
         Process32Next(hProcessSnap, &pe32);
         for (nProcessColumn = 0; *(pe32.szExeFile + nProcessColumn) != NULL; nProcessColumn++) {
             *(szExeFileCompare + nProcessColumn) = *(pe32.szExeFile + nProcessColumn);
-
         }
         if (!strcmp(szExeFileCompare, "winmine.exe")) {
             CloseHandle(hProcessSnap);
             return pe32;
-
         }
         memset(&szExeFileCompare, NULL, strlen(szExeFileCompare));
-
     }
-
     CloseHandle(hProcessSnap);
     memset(&pe32, NULL, sizeof(PROCESSENTRY32));
     return pe32;
+}
 
+int fnScreenBanner()
+{
+	char chBanner[MAP_HEIGHT / 2][MAP_WIDTH * 2] = {
+		{"  __  __ _                                   _   "},
+		{" |  \\/  (_)                                 | |  "},
+		{" | \\  / |_ _ __   ___  _____      _____  ___| |_ "},
+		{" | |\\/| | | '_ \\ / _ \\/ __\\ \\ /\\ / / _ \\/ _ \\ __|"},
+		{" | |  | | | | | |  __/\\__ \\\\ V  V /  __/  __/ |_ "},
+		{" |_|  |_|_|_| |_|\\___||___/ \\_/\\_/ \\___|\\___|\\__|"} };
+	UINT x, y;
+	for (y = 0; y < MAP_HEIGHT / 2; y++) {
+		for (x = 0; x < MAP_WIDTH * 2; x++) {
+			printf("%c", *(*(chBanner + y) + x));
+		}
+		puts("");
+	}
 }
 
 int fnMineLocationRadar(HANDLE hProcess)
 {
     unsigned char gameMapOnMemory[MAP_HEIGHT * MAP_WIDTH] = { 0  };
-    unsigned char gameMap[MAP_HEIGHT][MAP_WIDTH] = { NULL  };
+    unsigned char gameMap[MAP_HEIGHT][MAP_WIDTH] = { NULL };
 
     ReadProcessMemory(hProcess, (LPCVOID)MAP_START_ADDRESS, &gameMapOnMemory, 286, NULL);
 

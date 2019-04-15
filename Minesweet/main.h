@@ -17,6 +17,7 @@
 #define ID_BACKGROUND (0x40)
 
 PROCESSENTRY32 fnSearchMinesweeperProcess();
+int fnScreenBanner();
 int fnMineLocationradar(HANDLE hProcess);
 
 #endif

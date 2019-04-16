@@ -6,7 +6,7 @@
 
 ## What's the Minesweet?
 
-![minetime](https://github.com/danielsmith0612/Minesweet/blob/master/ref/runMinesweet.gif)
+![Minesweet-intro](https://github.com/danielsmith0612/Minesweet/blob/master/ref/Minesweet-intro.png)
 
 Minesweet is Minesweeper RCE(Reverse Code Engineering) project
 
@@ -16,11 +16,13 @@ I'll support Windows 7 minesweeper in a short time
 
 ### Features supported
 
-* Interactive function
+#### Game board analysis
+![Minesweet-mine](https://github.com/danielsmith0612/Minesweet/blob/master/ref/Minesweet-mine.png)
 
-* Game board analysis
+#### Free control the timer
+![Minesweet-timer-0](https://github.com/danielsmith0612/Minesweet/blob/master/ref/Minesweet-timer-0.png)
 
-* Free control the timer
+![Minesweet-timer-1](https://github.com/danielsmith0612/Minesweet/blob/master/ref/Minesweet-timer-1.png)
 
   
 

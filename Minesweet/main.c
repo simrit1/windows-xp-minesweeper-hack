@@ -11,7 +11,7 @@ int main()
     HANDLE hProcess;
     PROCESSENTRY32 pe32;
 
-	system("mode con cols=64 lines=30");
+	system("title Minesweet && mode con cols=64 lines=30");
 
     printf("Search the minesweeper processs...");
     pe32 = fnSearchMinesweeperProcess();
@@ -81,7 +81,7 @@ PROCESSENTRY32 fnSearchMinesweeperProcess() {
 
 int fnScreenBanner()
 {
-	char chBanner[MAP_HEIGHT * 2][MAP_WIDTH * 2] = {
+	char chBanner[MAP_HEIGHT - 5][MAP_WIDTH * 2] = {
 		{"  __  __ _                                   _   "},
 		{" |  \\/  (_)                                 | |  "},
 		{" | \\  / |_ _ __   ___  _____      _____  ___| |_ "},
@@ -94,7 +94,7 @@ int fnScreenBanner()
 	};
 
 	UINT x, y;
-	for (y = 0; y < MAP_HEIGHT / 2; y++) {
+	for (y = 0; y < (MAP_HEIGHT - 5); y++) {
 		for (x = 0; x < MAP_WIDTH * 2; x++) {
 			printf("%c", *(*(chBanner + y) + x));
 		}

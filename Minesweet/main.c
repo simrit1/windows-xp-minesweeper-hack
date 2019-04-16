@@ -17,6 +17,7 @@ int main()
     pe32 = fnSearchMinesweeperProcess();
     if (pe32.th32ProcessID == NULL) {
         puts("FAILED");
+		system("pause");
         exit(-1);
     }
 

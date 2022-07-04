@@ -1,6 +1,4 @@
-# mine-plow
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fandrewbae%2Fmine-plow&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23FFFFFF&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)  
-
+# Windows XP Minesweeper Hack
 <img src="https://user-images.githubusercontent.com/40394063/111699953-1e439580-887c-11eb-98c1-5b03a59f044e.png" width=300px>
 
 The mine-plow is an original name of Windows XP Minesweeper Hack so don't be confuse at file name(mine-plow-1.0-x64.exe)  

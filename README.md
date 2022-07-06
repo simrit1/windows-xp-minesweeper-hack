@@ -5,7 +5,8 @@ The mine-plow is an original name of Windows XP Minesweeper Hack so don't be con
 I made this hack for just a educational purpose only. as you know reverse engineering is fun.  
 If you have any technical question, leave a Q&A to below link.  
 
-https://github.com/andrewbae/Windows-XP-Minesweeper-Hack/discussions/new
+https://github.com/andrewbae/windows-xp-minesweeper-hack/discussions/new?category=q-a
+
 # Getting started
 ## Download
 https://github.com/andrewbae/Windows-XP-Minesweeper-Hack/releases/tag/1.0

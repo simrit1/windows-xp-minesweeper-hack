@@ -17,9 +17,8 @@ https://github.com/andrewbae/Windows-XP-Minesweeper-Hack/releases/tag/1.0
  ![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/40394063/111704518-9d3bcc80-8882-11eb-9bec-25ed9a6a110f.gif)
 
 # Contribution
-Report issues or open pull request with improvements  
-You can contact me directly via email  
-andy@pwner.kr
+
+Report issues or open pull requests with improvements  
 ## Build Instruction
 ### Prerequisites
 * CMake 3.12+
